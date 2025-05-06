@@ -1,0 +1,79 @@
+/* Full page gradient background */
+.login-bg {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* White box in center */
+.form-box {
+  background-color: #fff;
+  padding: 35px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Tab toggle buttons */
+.tab-toggle .btn {
+  width: 50%;
+  border: no;
+  font-weight: 600;
+  padding: 10px;
+  border: none;
+}
+
+.btn-gradient,
+.btn.btn-gradient,
+.btn.btn-outline-secondary {
+  background: linear-gradient(to right, #d84ef7, #fa7fb4);
+  color: white;
+  border: none;
+}
+
+.gradient-btn {
+  background: linear-gradient(to right, #d84ef7, #fa7fb4);
+  border: none;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 12px;
+  color: white;
+  transition: 0.3s ease;
+}
+
+.gradient-btn:hover {
+  opacity: 0.9;
+}
+
+.forgot-link {
+  font-size: 0.9rem;
+  color: #d84ef7;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  text-decoration: none;
+  color: black;
+  cursor: pointer;
+}
+
+.signup-link {
+  color: #fa7fb4;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.form-control {
+  border-radius: 10px;
+}
