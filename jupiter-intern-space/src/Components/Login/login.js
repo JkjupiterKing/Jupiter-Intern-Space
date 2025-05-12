@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import "./login.css";
+import { Link } from "react-router-dom";
+import ForgotPassword from "../forgot-password/forgot-password";
 import {
   Form,
   Button,
   Alert,
   Spinner,
-  Row,
-  Col,
   ToggleButtonGroup,
   ToggleButton,
 } from "react-bootstrap";
@@ -59,6 +59,16 @@ const Login = () => {
       }}
     >
       <div className="form-box shadow-lg">
+        <div className="d-flex align-items-center justify-content-center gap-2 mb-4">
+          <img
+            src="/logo.png"
+            alt="Logo"
+            style={{ height: "50px", color: "white" }}
+          />
+          <h4 className="mb-0" style={{ color: "white" }}>
+            Jupiter Intern Space
+          </h4>
+        </div>
         <ToggleButtonGroup
           type="radio"
           name="authType"
@@ -132,11 +142,20 @@ const Login = () => {
               />
             </Form.Group>
             <div className="text-end mb-3">
-              <a className="forgot-link">Forgot password?</a>
+              <button
+                type="button"
+                className="btn btn-link forgot-link p-0"
+                data-bs-toggle="modal"
+                data-bs-target="#forgotPasswordModal"
+                id="forgot-link"
+              >
+                Forgot password?
+              </button>
             </div>
             <Button
               type="submit"
-              className="w-100 gradient-btn"
+              className="gradient-btn"
+              id="submit-btn"
               disabled={loading}
             >
               {loading ? (
@@ -175,6 +194,7 @@ const Login = () => {
           </Form>
         )}
       </div>
+      <ForgotPassword />
     </div>
   );
 };
