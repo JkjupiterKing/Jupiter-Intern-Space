@@ -74,7 +74,6 @@ public class UserController {
         return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
 
-
     // ✅ Reset password using email and new password
     @PutMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(@RequestParam String email, @RequestParam String newPassword) {

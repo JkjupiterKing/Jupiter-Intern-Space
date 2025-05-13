@@ -9,10 +9,8 @@
 /* White box in center */
 .form-box {
   padding: 35px;
-  border-radius: 16px;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 /* Tab toggle buttons */
@@ -81,4 +79,17 @@
 }
 #forgot-link :hover {
   color: black;
+}
+/* Add this class for wider form during signup */
+.form-box.signup-mode {
+  max-width: 900px; /* Wider width for 3 fields per row */
+}
+
+/* Keep existing base form-box styles */
+.form-box {
+  padding: 35px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px; /* default for login */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
