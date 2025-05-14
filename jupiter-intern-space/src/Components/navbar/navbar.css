@@ -1,0 +1,92 @@
+/* Navbar.css */
+
+.navbar {
+    display: flex;
+    flex-direction: column;
+    width: 280px;
+    height: 100vh;
+    background-color: #0b4271;
+    color: white;
+    transition: width 0.3s ease;
+    overflow-x: hidden;
+  }
+  
+  .navbar-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .menu-icon {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .menu-icon span {
+    margin-left: 10px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+  
+  .navbar-links {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+  }
+  
+  .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+  
+  .nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .nav-item.active {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .nav-item span {
+    margin-left: 12px;
+  }
+  
+  /* Responsive design */
+  @media screen and (max-width: 768px) {
+    .navbar {
+      width: 70px;
+    }
+    
+    .navbar.expanded {
+      width: 280px;
+    }
+    
+    .navbar:not(.expanded) .menu-icon span,
+    .navbar:not(.expanded) .nav-item span {
+      display: none;
+    }
+    
+    .navbar:not(.expanded) .nav-item {
+      justify-content: center;
+      padding: 15px 0;
+    }
+  }
+  
+  /* If you want to add a fadeout effect for when navbar collapses */
+  @media screen and (max-width: 768px) {
+    .navbar:not(.expanded) .nav-item span {
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .navbar.expanded .nav-item span {
+      opacity: 1;
+      transition: opacity 0.2s 0.1s;
+    }
+  }

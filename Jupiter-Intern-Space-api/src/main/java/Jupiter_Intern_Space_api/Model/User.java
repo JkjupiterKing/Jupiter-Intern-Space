@@ -16,34 +16,31 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "full_name", nullable = false)
+    @Column(name = "full_name")
     private String fullName;
 
-    @Column(name = "email", unique = true, nullable = false)
+    @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "phone_number", nullable = false)
+    @Column(name = "phone_number")
     private String phoneNumber;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "college_name", nullable = false)
+    @Column(name = "college_name")
     private String collegeName;
 
-    @Column(nullable = false)
     private String degree;
-
-    @Column(nullable = false)
     private String department;
 
-    @Column(name = "year_of_study", nullable = false)
+    @Column(name = "year_of_study")
     private String yearOfStudy;
 
-    @Column(name = "internship_domain", nullable = false)
+    @Column(name = "internship_domain")
     private String internshipDomain;
 
-    @Column(name = "preferred_mode", nullable = false)
+    @Column(name = "preferred_mode")
     private String preferredMode;
 
     @Column(name = "documents")

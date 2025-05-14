@@ -14,12 +14,7 @@ import { FaEnvelope, FaLock, FaUser, FaPhone } from "react-icons/fa";
 
 const Login = () => {
   const [activeTab, setActiveTab] = useState("login");
-
-  const [loginData, setLoginData] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
     name: "",
     phoneNumber: "",
@@ -29,27 +24,105 @@ const Login = () => {
     yearOfStudy: "",
     internshipDomain: "",
     preferredMode: "",
-    document: null,
+    documents: null,
     email: "",
     password: "",
   });
 
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [showOtpField, setShowOtpField] = useState(false);
+  const [verifiedOtp, setVerifiedOtp] = useState(false);
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (activeTab === "login") {
-      setLoginData({
-        ...loginData,
-        [name]: value,
-      });
+      setLoginData({ ...loginData, [name]: value });
     } else {
-      setSignupData({
-        ...signupData,
-        [name]: files ? files[0] : value,
+      setSignupData({ ...signupData, [name]: files ? files[0] : value });
+    }
+  };
+
+  const sendOtp = async () => {
+    try {
+      const params = new URLSearchParams();
+      params.append("email", signupData.email);
+
+      const response = await fetch("http://localhost:8080/otp/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
       });
+
+      const text = await response.text();
+      if (response.ok) {
+        setShowOtpField(true);
+        setMessage("OTP sent to your email.");
+      } else {
+        setMessage(text || "Failed to send OTP.");
+      }
+    } catch (error) {
+      setMessage("Error sending OTP.");
+    }
+  };
+
+  const verifyOtp = async () => {
+    try {
+      const params = new URLSearchParams();
+      params.append("email", signupData.email);
+      params.append("otp", otp);
+
+      const response = await fetch("http://localhost:8080/otp/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
+      });
+
+      const text = await response.text();
+      if (text.toLowerCase().includes("success")) {
+        setVerifiedOtp(true);
+        setMessage("OTP verified! Completing signup...");
+        await submitSignup();
+      } else {
+        setMessage("Invalid or expired OTP.");
+      }
+    } catch (error) {
+      setMessage("Error verifying OTP.");
+    }
+  };
+
+  const submitSignup = async () => {
+    try {
+      const payload = { ...signupData };
+      delete payload.document; // assuming backend does not need file uploads now
+
+      const response = await fetch("http://localhost:8080/users/addUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setMessage("Signup successful! Please login.");
+        setActiveTab("login");
+        setShowOtpField(false);
+        setOtp("");
+        setVerifiedOtp(false);
+      } else {
+        setMessage(result.message || "Signup failed.");
+      }
+    } catch (error) {
+      setMessage("Signup error.");
     }
   };
 
@@ -58,43 +131,32 @@ const Login = () => {
     setLoading(true);
     setMessage("");
 
-    try {
-      if (activeTab === "login") {
-        const response = await fetch("https://your-api.com/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(loginData),
-        });
+    if (activeTab === "login") {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/email/${loginData.email}`
+        );
 
-        const result = await response.json();
-        if (response.ok) {
-          setMessage("Login successful!");
-          navigate("/home");
+        if (!response.ok) {
+          setMessage("User not found.");
         } else {
-          setMessage(result.message || "Invalid credentials.");
+          const user = await response.json();
+          if (user.password === loginData.password) {
+            setMessage("Login successful!");
+            navigate("/college-management");
+          } else {
+            setMessage("Incorrect password.");
+          }
         }
-      } else {
-        const formPayload = new FormData();
-        for (const key in signupData) {
-          formPayload.append(key, signupData[key]);
-        }
-
-        const response = await fetch("https://your-api.com/signup", {
-          method: "POST",
-          body: formPayload,
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-          setMessage("Signup successful! Please login.");
-          setActiveTab("login");
-        } else {
-          setMessage(result.message || "Signup failed.");
-        }
+      } catch (error) {
+        setMessage("Login error.");
       }
-    } catch (error) {
-      console.error("Auth error:", error);
-      setMessage("Something went wrong. Please try again.");
+    } else {
+      if (!showOtpField) {
+        await sendOtp();
+      } else if (!verifiedOtp) {
+        await verifyOtp();
+      }
     }
 
     setLoading(false);
@@ -103,19 +165,13 @@ const Login = () => {
   return (
     <div
       className="login-bg"
-      style={{
-        background: "url('/Background.png') no-repeat center center",
-      }}
+      style={{ background: "url('/Background.png') no-repeat center center" }}
     >
       <div
         className={`form-box ${activeTab === "signup" ? "signup-mode" : ""}`}
       >
         <div className="d-flex align-items-center justify-content-center gap-2 mb-4">
-          <img
-            src="/logo.png"
-            alt="Logo"
-            style={{ height: "50px", color: "white" }}
-          />
+          <img src="/logo.png" alt="Logo" style={{ height: "50px" }} />
           <h4 className="mb-0" style={{ color: "white" }}>
             Jupiter Intern Space
           </h4>
@@ -128,36 +184,34 @@ const Login = () => {
           onChange={(val) => {
             setActiveTab(val);
             setMessage("");
+            setShowOtpField(false);
+            setOtp("");
+            setVerifiedOtp(false);
           }}
           className="w-100 mb-3 tab-toggle"
         >
-          <ToggleButton
-            id="t1"
-            variant={activeTab === "login" ? "gradient" : "outline-secondary"}
-            value="login"
-          >
+          <ToggleButton id="t1" variant="outline-secondary" value="login">
             Login
           </ToggleButton>
-          <ToggleButton
-            id="t2"
-            variant={activeTab === "signup" ? "gradient" : "outline-secondary"}
-            value="signup"
-          >
+          <ToggleButton id="t2" variant="outline-secondary" value="signup">
             Signup
           </ToggleButton>
         </ToggleButtonGroup>
 
         {message && (
           <Alert
-            variant={message.includes("successful") ? "success" : "danger"}
+            variant={
+              message.toLowerCase().includes("success") ? "success" : "danger"
+            }
           >
             {message}
           </Alert>
         )}
 
-        <Form onSubmit={handleFormSubmit} encType="multipart/form-data">
+        <Form onSubmit={handleFormSubmit}>
           {activeTab === "signup" && (
             <>
+              {/* Signup Fields */}
               <div className="row">
                 <div className="col-md-4 mb-3">
                   <Form.Label>
@@ -257,7 +311,6 @@ const Login = () => {
                   <Form.Control
                     type="file"
                     name="document"
-                    accept=".pdf,.doc,.docx"
                     onChange={handleChange}
                   />
                 </div>
@@ -289,6 +342,18 @@ const Login = () => {
                   />
                 </div>
               </div>
+
+              {showOtpField && !verifiedOtp && (
+                <Form.Group className="mb-3">
+                  <Form.Label>Enter OTP</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    required
+                  />
+                </Form.Group>
+              )}
             </>
           )}
 
@@ -306,7 +371,6 @@ const Login = () => {
                   required
                 />
               </Form.Group>
-
               <Form.Group className="mb-3">
                 <Form.Label>
                   <FaLock className="me-2" /> Password
@@ -343,6 +407,8 @@ const Login = () => {
               <Spinner animation="border" size="sm" />
             ) : activeTab === "login" ? (
               "Login"
+            ) : showOtpField && !verifiedOtp ? (
+              "Verify OTP"
             ) : (
               "Signup"
             )}
