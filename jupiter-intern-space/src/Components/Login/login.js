@@ -16,7 +16,7 @@ const Login = () => {
   const [activeTab, setActiveTab] = useState("login");
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({
-    name: "",
+    fullName: "",
     phoneNumber: "",
     collegeName: "",
     degree: "",
@@ -134,21 +134,31 @@ const Login = () => {
     if (activeTab === "login") {
       try {
         const response = await fetch(
-          `http://localhost:8080/email/${loginData.email}`
+          `http://localhost:8080/users/email/${loginData.email}`
         );
 
         if (!response.ok) {
           setMessage("User not found.");
         } else {
           const user = await response.json();
-          if (user.password === loginData.password) {
+
+          // Base64 decode the password from response
+          const decodedPassword = atob(user.password);
+
+          if (decodedPassword === loginData.password) {
             setMessage("Login successful!");
+
+            // Save user to localStorage (excluding password)
+            const { password, ...userWithoutPassword } = user;
+            localStorage.setItem("user", JSON.stringify(userWithoutPassword));
+
             navigate("/college-management");
           } else {
             setMessage("Incorrect password.");
           }
         }
       } catch (error) {
+        console.error("Login error:", error);
         setMessage("Login error.");
       }
     } else {
@@ -219,7 +229,7 @@ const Login = () => {
                   </Form.Label>
                   <Form.Control
                     type="text"
-                    name="name"
+                    name="fullName"
                     value={signupData.name}
                     onChange={handleChange}
                     required

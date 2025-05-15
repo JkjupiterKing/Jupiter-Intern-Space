@@ -14,8 +14,16 @@ function ForgotPassword() {
   const handleSendOTP = async () => {
     setLoading(true);
     try {
-      const res = await axios.post("/api/send-otp", { email });
-      setMessage(res.data.message || "OTP sent!");
+      const params = new URLSearchParams();
+      params.append("email", email);
+
+      const res = await axios.post("http://localhost:8080/otp/send", params, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
+
+      setMessage(res.data.message || "OTP sent to your email-Id!");
       setStep(2);
     } catch (err) {
       setMessage(err.response?.data?.error || "Failed to send OTP");
@@ -26,7 +34,16 @@ function ForgotPassword() {
   const handleVerifyOTP = async () => {
     setLoading(true);
     try {
-      const res = await axios.post("/api/verify-otp", { email, otp });
+      const params = new URLSearchParams();
+      params.append("email", email);
+      params.append("otp", otp);
+
+      const res = await axios.post("http://localhost:8080/otp/verify", params, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
+
       setMessage(res.data.message || "OTP verified!");
       setStep(3);
     } catch (err) {
@@ -38,12 +55,21 @@ function ForgotPassword() {
   const handleResetPassword = async () => {
     setLoading(true);
     try {
-      const res = await axios.post("/api/reset-password", {
-        email,
-        newPassword,
-      });
+      const params = new URLSearchParams();
+      params.append("email", email);
+      params.append("newPassword", newPassword);
+
+      const res = await axios.put(
+        "http://localhost:8080/users/reset-password",
+        params,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+
       setMessage(res.data.message || "Password reset successfully!");
-      // You might want to auto-close the modal or redirect here
     } catch (err) {
       setMessage(err.response?.data?.error || "Password reset failed");
     }
@@ -122,13 +148,6 @@ function ForgotPassword() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                   />
-                  <button
-                    className="btn btn-outline-secondary"
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? "Hide" : "Show"}
-                  </button>
                 </div>
                 <button
                   className="btn btn-warning mt-3"

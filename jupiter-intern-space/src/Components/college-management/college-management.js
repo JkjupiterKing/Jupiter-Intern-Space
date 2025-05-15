@@ -1,31 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./college-management.css";
 import Navbar from "../navbar/navbar";
+import axios from "axios";
+
+const API_BASE_URL = "http://localhost:8080/colleges";
 
 const CollegeManagement = () => {
-  const [colleges, setColleges] = useState([
-    {
-      id: 1,
-      code: "AITS001",
-      name: "Amal Institute of Technology",
-      address: "123 College Ave, Techville, TX 75001",
-      status: "Active",
-    },
-    {
-      id: 2,
-      code: "BSCT002",
-      name: "Best Science & Technology",
-      address: "456 University Blvd, Academytown, CA 90210",
-      status: "Active",
-    },
-    {
-      id: 3,
-      code: "CECT003",
-      name: "Central Engineering College",
-      address: "789 Education St, Learningville, NY 10001",
-      status: "Inactive",
-    },
-  ]);
+  const [colleges, setColleges] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -37,32 +18,50 @@ const CollegeManagement = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
+  useEffect(() => {
+    fetchColleges();
+  }, []);
+
+  const fetchColleges = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/all`);
+      setColleges(response.data);
+    } catch (error) {
+      console.error("Failed to fetch colleges:", error);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (isEditing) {
-      setColleges(
-        colleges.map((college) =>
-          college.id === editingId ? { ...college, ...formData } : college
-        )
-      );
-    } else {
-      const newCollege = {
-        id: Date.now(),
-        ...formData,
-      };
-      setColleges([...colleges, newCollege]);
+    try {
+      if (isEditing) {
+        await axios.put(`${API_BASE_URL}/${editingId}`, {
+          id: editingId,
+          ...formData,
+        });
+      } else {
+        await axios.post(`${API_BASE_URL}/create`, formData);
+      }
+      await fetchColleges();
+      handleCloseModal();
+    } catch (error) {
+      console.error("Error saving college:", error);
     }
-    handleCloseModal();
   };
 
-  const handleDeleteCollege = (id) => {
+  const handleDeleteCollege = async (id) => {
     if (window.confirm("Are you sure you want to delete this college?")) {
-      setColleges(colleges.filter((college) => college.id !== id));
+      try {
+        await axios.delete(`${API_BASE_URL}/${id}`);
+        await fetchColleges();
+      } catch (error) {
+        console.error("Error deleting college:", error);
+      }
     }
   };
 
