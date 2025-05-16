@@ -9,7 +9,6 @@ import {
   Video,
   Award,
   LogOut,
-  Menu as MenuIcon,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 

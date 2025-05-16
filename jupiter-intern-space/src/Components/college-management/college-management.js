@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./college-management.css";
 import Navbar from "../navbar/navbar";
 import axios from "axios";
@@ -8,15 +8,16 @@ const API_BASE_URL = "http://localhost:8080/colleges";
 const CollegeManagement = () => {
   const [colleges, setColleges] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    code: "",
-    name: "",
-    address: "",
+    collegeCode: "",
+    collegeName: "",
+    collegeAddress: "",
     status: "Active",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
+  const modalRef = useRef();
 
   useEffect(() => {
     fetchColleges();
@@ -31,9 +32,35 @@ const CollegeManagement = () => {
     }
   };
 
+  // Reset form data after modal closes
+  useEffect(() => {
+    const modalEl = modalRef.current;
+
+    const handleModalHidden = () => {
+      setFormData({
+        collegeCode: "",
+        collegeName: "",
+        collegeAddress: "",
+        status: "Active",
+      });
+      setIsEditing(false);
+      setEditingId(null);
+    };
+
+    if (modalEl) {
+      modalEl.addEventListener("hidden.bs.modal", handleModalHidden);
+    }
+
+    return () => {
+      if (modalEl) {
+        modalEl.removeEventListener("hidden.bs.modal", handleModalHidden);
+      }
+    };
+  }, []);
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
-    setFormData({ ...formData, [id]: value });
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleFormSubmit = async (e) => {
@@ -48,7 +75,7 @@ const CollegeManagement = () => {
         await axios.post(`${API_BASE_URL}/create`, formData);
       }
       await fetchColleges();
-      handleCloseModal();
+      document.getElementById("closeModalBtn").click();
     } catch (error) {
       console.error("Error saving college:", error);
     }
@@ -67,42 +94,32 @@ const CollegeManagement = () => {
 
   const handleUpdateCollege = (college) => {
     setFormData({
-      code: college.code,
-      name: college.name,
-      address: college.address,
-      status: college.status,
+      collegeCode: college.collegeCode || "",
+      collegeName: college.collegeName || "",
+      collegeAddress: college.collegeAddress || "",
+      status: college.status || "Active",
     });
     setIsEditing(true);
     setEditingId(college.id);
-    setIsModalOpen(true);
+    new window.bootstrap.Modal(modalRef.current).show();
   };
 
   const handleAddCollege = () => {
     setFormData({
-      code: "",
-      name: "",
-      address: "",
+      collegeCode: "",
+      collegeName: "",
+      collegeAddress: "",
       status: "Active",
     });
     setIsEditing(false);
     setEditingId(null);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setFormData({
-      code: "",
-      name: "",
-      address: "",
-      status: "Active",
-    });
-    setIsEditing(false);
-    setEditingId(null);
+    new window.bootstrap.Modal(modalRef.current).show();
   };
 
   const filteredColleges = colleges.filter((college) =>
-    college.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (college.collegeName || "")
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -127,8 +144,8 @@ const CollegeManagement = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        <table>
-          <thead>
+        <table className="table table-bordered table-striped">
+          <thead className="table-primary">
             <tr>
               <th>College Code</th>
               <th>College Name</th>
@@ -140,19 +157,19 @@ const CollegeManagement = () => {
           <tbody>
             {filteredColleges.map((college) => (
               <tr key={college.id}>
-                <td>{college.code}</td>
-                <td>{college.name}</td>
-                <td>{college.address}</td>
-                <td>{college.status}</td>
+                <td>{college.collegeCode}</td>
+                <td>{college.collegeName}</td>
+                <td>{college.collegeAddress}</td>
+                <td>{college.status || "-"}</td>
                 <td>
                   <button
-                    className="action-btn update-btn"
+                    className="btn btn-sm btn-primary me-2"
                     onClick={() => handleUpdateCollege(college)}
                   >
                     Update
                   </button>
                   <button
-                    className="action-btn delete-btn"
+                    className="btn btn-sm btn-danger"
                     onClick={() => handleDeleteCollege(college.id)}
                   >
                     Delete
@@ -163,73 +180,93 @@ const CollegeManagement = () => {
           </tbody>
         </table>
 
-        {isModalOpen && (
-          <div className="modal">
+        {/* Bootstrap Modal */}
+        <div
+          className="modal fade"
+          id="collegeModal"
+          ref={modalRef}
+          tabIndex="-1"
+          aria-hidden="true"
+        >
+          <div className="modal-dialog">
             <div className="modal-content">
-              <div className="modal-header">
-                <h2>{isEditing ? "Update College" : "Add New College"}</h2>
-                <button className="close-btn" onClick={handleCloseModal}>
-                  &times;
-                </button>
-              </div>
-              <form id="collegeForm" onSubmit={handleFormSubmit}>
-                <div className="form-group">
-                  <label htmlFor="code">College Code</label>
-                  <input
-                    type="text"
-                    id="code"
-                    value={formData.code}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="name">College Name</label>
-                  <input
-                    type="text"
-                    id="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="address">College Address</label>
-                  <textarea
-                    id="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="status">Status</label>
-                  <select
-                    id="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
-                </div>
-                <div className="form-buttons">
+              <form onSubmit={handleFormSubmit}>
+                <div className="modal-header">
+                  <h5 className="modal-title">
+                    {isEditing ? "Update College" : "Add New College"}
+                  </h5>
                   <button
                     type="button"
-                    className="cancel-btn"
-                    onClick={handleCloseModal}
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                    id="closeModalBtn"
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="collegeCode"
+                      placeholder="Enter College Code"
+                      value={formData.collegeCode}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="collegeName"
+                      placeholder="Enter College Name"
+                      value={formData.collegeName}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <textarea
+                      className="form-control"
+                      id="collegeAddress"
+                      value={formData.collegeAddress}
+                      onChange={handleInputChange}
+                      placeholder="Enter College Address"
+                      required
+                    ></textarea>
+                  </div>
+                  <div className="mb-3">
+                    <select
+                      className="form-select"
+                      id="status"
+                      value={formData.status}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="">Select Status</option>
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-bs-dismiss="modal"
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="submit-btn">
-                    Save
+                  <button type="submit" className="btn btn-primary">
+                    Save College
                   </button>
                 </div>
               </form>
             </div>
           </div>
-        )}
+        </div>
+        {/* End of Modal */}
       </div>
     </div>
   );
