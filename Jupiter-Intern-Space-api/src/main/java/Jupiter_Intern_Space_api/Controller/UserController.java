@@ -17,8 +17,9 @@ import java.util.Optional;
 @CrossOrigin
 @RequiredArgsConstructor
 public class UserController {
+
     @Autowired
-    private  UserRepository userRepository;
+    private UserRepository userRepository;
 
     // ✅ Get all users
     @GetMapping("/all")
@@ -35,13 +36,21 @@ public class UserController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // ✅ Create user
+    // ✅ Create user with email check
     @PostMapping("/addUser")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<?> createUser(@RequestBody User user) {
         System.out.println("Received user: " + user);
-        String encodedPassword = encodePassword(user.getPassword());
-        user.setPassword(encodedPassword);
-        return new ResponseEntity<>(userRepository.save(user), HttpStatus.CREATED);
+
+        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
+        if (existingUser.isPresent()) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body("Error: Email already exists");
+        }
+
+        user.setPassword(encodePassword(user.getPassword()));
+        User savedUser = userRepository.save(user);
+        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
     // ✅ Update user
@@ -50,10 +59,17 @@ public class UserController {
         if (!userRepository.existsById(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
         user.setId(id);
-        if (user.getPassword() != null) {
+
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             user.setPassword(encodePassword(user.getPassword()));
+        } else {
+            // Keep existing password if not provided
+            Optional<User> existing = userRepository.findById(id);
+            existing.ifPresent(value -> user.setPassword(value.getPassword()));
         }
+
         return new ResponseEntity<>(userRepository.save(user), HttpStatus.OK);
     }
 
@@ -63,6 +79,7 @@ public class UserController {
         if (!userRepository.existsById(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
         userRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -70,21 +87,26 @@ public class UserController {
     // ✅ Get user by email
     @GetMapping("/email/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
-        User user = userRepository.findByEmail(email);
-        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        return userOpt.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // ✅ Reset password using email and new password
+    // ✅ Reset password using email
     @PutMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@RequestParam String email, @RequestParam String newPassword) {
-        User user = userRepository.findByEmail(email);
-        if (user == null) return ResponseEntity.notFound().build();
+    public ResponseEntity<String> resetPassword(@RequestParam String email, @RequestParam String newPassword) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with provided email.");
+        }
+
+        User user = userOpt.get();
         user.setPassword(encodePassword(newPassword));
         userRepository.save(user);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Password reset successfully.");
     }
 
-    // ❗ Password encoding (base64, use BCrypt or Argon2 in production)
+    // ❗ Password encoding — base64 is insecure, use BCrypt or Argon2 in production
     private String encodePassword(String password) {
         return Base64.getEncoder().encodeToString(password.getBytes());
     }

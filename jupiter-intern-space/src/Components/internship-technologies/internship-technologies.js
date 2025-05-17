@@ -8,11 +8,9 @@ const API_BASE_URL = "http://localhost:8080/internship-technologies";
 const InternshipTechnologies = () => {
   const [technologies, setTechnologies] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    status: "Active",
+    Technologyname: "",
+    Description: "",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -44,10 +42,13 @@ const InternshipTechnologies = () => {
           ...formData,
         });
       } else {
-        await axios.post(`${API_BASE_URL}/create`, formData);
+        await axios.post(`${API_BASE_URL}/add`, formData);
       }
       await fetchTechnologies();
-      handleCloseModal();
+      const modalEl = document.getElementById("techModal");
+      const modalInstance = window.bootstrap.Modal.getInstance(modalEl);
+      modalInstance.hide();
+      resetForm();
     } catch (error) {
       console.error("Error saving technology:", error);
     }
@@ -66,39 +67,30 @@ const InternshipTechnologies = () => {
 
   const handleUpdateTechnology = (tech) => {
     setFormData({
-      name: tech.name,
-      description: tech.description,
-      status: tech.status,
+      Technologyname: tech.Technologyname,
+      Description: tech.Description,
     });
     setIsEditing(true);
     setEditingId(tech.id);
-    setIsModalOpen(true);
+    new window.bootstrap.Modal(document.getElementById("techModal")).show();
   };
 
   const handleAddTechnology = () => {
-    setFormData({
-      name: "",
-      description: "",
-      status: "Active",
-    });
-    setIsEditing(false);
-    setEditingId(null);
-    setIsModalOpen(true);
+    resetForm();
+    new window.bootstrap.Modal(document.getElementById("techModal")).show();
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const resetForm = () => {
     setFormData({
-      name: "",
-      description: "",
-      status: "Active",
+      Technologyname: "",
+      Description: "",
     });
     setIsEditing(false);
     setEditingId(null);
   };
 
   const filteredTechnologies = technologies.filter((tech) =>
-    tech.name.toLowerCase().includes(searchQuery.toLowerCase())
+    tech.Technologyname.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -106,26 +98,30 @@ const InternshipTechnologies = () => {
       <div className="sidebar">
         <Navbar />
       </div>
-      <div className="main-content">
-        <div className="header">
+      <div className="main-content p-4">
+        <div className="d-flex justify-content-between align-items-center mb-3">
           <h1>Internship Technologies</h1>
-          <button className="add-btn" onClick={handleAddTechnology}>
+          <button
+            className="btn btn-primary"
+            onClick={handleAddTechnology}
+            id="add-btn"
+          >
             Add Technology
           </button>
         </div>
 
         <input
           type="text"
-          className="search-bar"
+          className="form-control mb-3"
           placeholder="Search by Technology Name"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        <table>
-          <thead>
+        <table className="table table-bordered">
+          <thead className="table-light">
             <tr>
-              <th>Technology Name</th>
+              <th>Name</th>
               <th>Description</th>
               <th>Actions</th>
             </tr>
@@ -133,18 +129,17 @@ const InternshipTechnologies = () => {
           <tbody>
             {filteredTechnologies.map((tech) => (
               <tr key={tech.id}>
-                <td>{tech.name}</td>
-                <td>{tech.description}</td>
-                <td>{tech.status}</td>
+                <td>{tech.Technologyname}</td>
+                <td>{tech.Description}</td>
                 <td>
                   <button
-                    className="action-btn update-btn"
+                    className="btn btn-sm btn-warning me-2"
                     onClick={() => handleUpdateTechnology(tech)}
                   >
                     Update
                   </button>
                   <button
-                    className="action-btn delete-btn"
+                    className="btn btn-sm btn-danger"
                     onClick={() => handleDeleteTechnology(tech.id)}
                   >
                     Delete
@@ -155,59 +150,71 @@ const InternshipTechnologies = () => {
           </tbody>
         </table>
 
-        {isModalOpen && (
-          <div className="modal">
+        {/* Bootstrap Modal */}
+        <div
+          className="modal fade"
+          id="techModal"
+          tabIndex="-1"
+          aria-hidden="true"
+        >
+          <div className="modal-dialog">
             <div className="modal-content">
-              <div className="modal-header">
-                <h2>{isEditing ? "Update Technology" : "Add New Technology"}</h2>
-                <button className="close-btn" onClick={handleCloseModal}>
-                  &times;
-                </button>
-              </div>
               <form onSubmit={handleFormSubmit}>
-                <div className="form-group">
-                  <label htmlFor="name">Technology Name</label>
-                  <input
-                    type="text"
-                    id="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                  />
+                <div className="modal-header">
+                  <h5 className="modal-title">
+                    {isEditing ? "Update Technology" : "Add New Technology"}
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="description">Description</label>
-                  <textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    required
-                  />
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label htmlFor="Technologyname" className="form-label">
+                      Technology Name
+                    </label>
+                    <input
+                      type="text"
+                      id="Technologyname"
+                      className="form-control"
+                      value={formData.Technologyname}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="Description" className="form-label">
+                      Description
+                    </label>
+                    <textarea
+                      id="Description"
+                      className="form-control"
+                      value={formData.Description}
+                      onChange={handleInputChange}
+                      required
+                    ></textarea>
+                  </div>
                 </div>
-                {/* <div className="form-group">
-                  <label htmlFor="status">Status</label>
-                  <select
-                    id="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                    required
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-bs-dismiss="modal"
                   >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
-                </div> */}
-                <div className="form-buttons">
-                  <button type="button" className="cancel-btn" onClick={handleCloseModal}>
                     Cancel
                   </button>
-                  <button type="submit" className="submit-btn">
-                    Save
+                  <button type="submit" className="btn btn-primary">
+                    Save Technology
                   </button>
                 </div>
               </form>
             </div>
           </div>
-        )}
+        </div>
+        {/* End Bootstrap Modal */}
       </div>
     </div>
   );

@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from "react";
-import "./intern-management.css";
 import Navbar from "../navbar/navbar";
 import axios from "axios";
+import "./intern-management.css";
 
-const API_BASE_URL = "http://localhost:8080/interns";
+const API_BASE_URL = "http://localhost:8080/users";
 
 const InternManagement = () => {
   const [interns, setInterns] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    fullName: "",
     email: "",
-    phone: "",
-    college: "",
-    domain: "",
-    year: "",
-    status: "Active",
+    phoneNumber: "",
+    password: "",
+    collegeName: "",
+    degree: "",
+    department: "",
+    yearOfStudy: "",
+    internshipDomain: "",
+    preferredMode: "",
+    documents: "",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -48,10 +51,13 @@ const InternManagement = () => {
           ...formData,
         });
       } else {
-        await axios.post(`${API_BASE_URL}/create`, formData);
+        await axios.post(`${API_BASE_URL}/addUser`, formData);
       }
       await fetchInterns();
-      handleCloseModal();
+      const modalEl = document.getElementById("internModal");
+      const modalInstance = window.bootstrap.Modal.getInstance(modalEl);
+      modalInstance.hide();
+      resetForm();
     } catch (error) {
       console.error("Error saving intern:", error);
     }
@@ -69,52 +75,37 @@ const InternManagement = () => {
   };
 
   const handleUpdateIntern = (intern) => {
-    setFormData({
-      name: intern.name,
-      email: intern.email,
-      phone: intern.phone,
-      college: intern.college,
-      domain: intern.domain,
-      year: intern.year,
-      status: intern.status,
-    });
+    setFormData({ ...intern, password: "" });
     setIsEditing(true);
     setEditingId(intern.id);
-    setIsModalOpen(true);
+    new window.bootstrap.Modal(document.getElementById("internModal")).show();
   };
 
   const handleAddIntern = () => {
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      college: "",
-      domain: "",
-      year: "",
-      status: "Active",
-    });
-    setIsEditing(false);
-    setEditingId(null);
-    setIsModalOpen(true);
+    resetForm();
+    new window.bootstrap.Modal(document.getElementById("internModal")).show();
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const resetForm = () => {
     setFormData({
-      name: "",
+      fullName: "",
       email: "",
-      phone: "",
-      college: "",
-      domain: "",
-      year: "",
-      status: "Active",
+      phoneNumber: "",
+      password: "",
+      collegeName: "",
+      degree: "",
+      department: "",
+      yearOfStudy: "",
+      internshipDomain: "",
+      preferredMode: "",
+      documents: "",
     });
     setIsEditing(false);
     setEditingId(null);
   };
 
   const filteredInterns = interns.filter((intern) =>
-    intern.name.toLowerCase().includes(searchQuery.toLowerCase())
+    intern.fullName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -123,24 +114,28 @@ const InternManagement = () => {
         <Navbar />
       </div>
 
-      <div className="main-content">
-        <div className="header">
+      <div className="main-content p-4">
+        <div className="d-flex justify-content-between align-items-center mb-3">
           <h1>Intern Management</h1>
-          <button className="add-btn" onClick={handleAddIntern}>
+          <button
+            className="btn btn-primary"
+            onClick={handleAddIntern}
+            id="add-btn"
+          >
             Add Intern
           </button>
         </div>
 
         <input
           type="text"
-          className="search-bar"
+          className="form-control mb-3"
           placeholder="Search by Intern Name"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        <table>
-          <thead>
+        <table className="table table-bordered">
+          <thead className="table-light">
             <tr>
               <th>SI No</th>
               <th>Name</th>
@@ -149,7 +144,6 @@ const InternManagement = () => {
               <th>College</th>
               <th>Domain</th>
               <th>Year</th>
-              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -157,22 +151,23 @@ const InternManagement = () => {
             {filteredInterns.map((intern, index) => (
               <tr key={intern.id}>
                 <td>{index + 1}</td>
-                <td>{intern.name}</td>
+                <td>{intern.fullName}</td>
                 <td>{intern.email}</td>
-                <td>{intern.phone}</td>
-                <td>{intern.college}</td>
-                <td>{intern.domain}</td>
-                <td>{intern.year}</td>
-                <td>{intern.status}</td>
+                <td>{intern.phoneNumber}</td>
+                <td>{intern.collegeName}</td>
+                <td>{intern.internshipDomain}</td>
+                <td>{intern.yearOfStudy}</td>
                 <td>
                   <button
-                    className="action-btn update-btn"
+                    className="btn btn-sm btn-warning me-2"
+                    id="btn-update"
                     onClick={() => handleUpdateIntern(intern)}
                   >
                     Update
                   </button>
                   <button
-                    className="action-btn delete-btn"
+                    className="btn btn-sm btn-danger"
+                    id="btn-delete"
                     onClick={() => handleDeleteIntern(intern.id)}
                   >
                     Delete
@@ -182,56 +177,117 @@ const InternManagement = () => {
             ))}
           </tbody>
         </table>
-
-        {isModalOpen && (
-          <div className="modal">
+        {/* Bootstrap Modal */}
+        <div
+          className="modal fade"
+          id="internModal"
+          tabIndex="-1"
+          aria-hidden="true"
+        >
+          <div className="modal-dialog">
             <div className="modal-content">
-              <div className="modal-header">
-                <h2>{isEditing ? "Update Intern" : "Add New Intern"}</h2>
-                <button className="close-btn" onClick={handleCloseModal}>
-                  &times;
-                </button>
-              </div>
               <form onSubmit={handleFormSubmit}>
-                {["name", "email", "phone", "college", "domain", "year"].map(
-                  (field) => (
-                    <div className="form-group" key={field}>
-                      <label htmlFor={field}>
-                        {field.charAt(0).toUpperCase() + field.slice(1)}
-                      </label>
+                <div className="modal-header">
+                  <h5 className="modal-title">
+                    {isEditing ? "Update Intern" : "Add New Intern"}
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  {[
+                    { id: "fullName", type: "text", placeholder: "Full Name" },
+                    { id: "email", type: "email", placeholder: "Email" },
+                    {
+                      id: "phoneNumber",
+                      type: "text",
+                      placeholder: "Phone Number",
+                    },
+                    {
+                      id: "password",
+                      type: "password",
+                      placeholder: "Password",
+                      required: !isEditing,
+                    },
+                    {
+                      id: "collegeName",
+                      type: "text",
+                      placeholder: "College Name",
+                    },
+                    { id: "degree", type: "text", placeholder: "Degree" },
+                    {
+                      id: "department",
+                      type: "text",
+                      placeholder: "Department",
+                    },
+                    {
+                      id: "yearOfStudy",
+                      type: "text",
+                      placeholder: "Year of Study",
+                    },
+                    {
+                      id: "internshipDomain",
+                      type: "text",
+                      placeholder: "Internship Domain",
+                    },
+                  ].map(({ id, type, placeholder, required = true }) => (
+                    <div className="mb-3" key={id}>
                       <input
-                        type="text"
-                        id={field}
-                        value={formData[field]}
+                        type={type}
+                        className="form-control"
+                        id={id}
+                        placeholder={placeholder}
+                        value={formData[id]}
                         onChange={handleInputChange}
-                        required
+                        required={required}
                       />
                     </div>
-                  )
-                )}
-                <div className="form-group">
-                  <label htmlFor="status">Status</label>
-                  <select
-                    id="status"
-                    value={formData.status}
-                    onChange={handleInputChange}
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
+                  ))}
+
+                  <div className="mb-3">
+                    <select
+                      className="form-select"
+                      id="preferredMode"
+                      value={formData.preferredMode}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="">Select Preferred Mode</option>
+                      <option value="Online">Online</option>
+                      <option value="Offline">Offline</option>
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <input
+                      type="file"
+                      className="form-control"
+                      id="documents"
+                      onChange={handleInputChange}
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    />
+                  </div>
                 </div>
-                <div className="form-buttons">
-                  <button type="button" className="cancel-btn" onClick={handleCloseModal}>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="submit-btn">
-                    Save
+                  <button type="submit" className="btn btn-primary">
+                    Save Intern
                   </button>
                 </div>
               </form>
             </div>
           </div>
-        )}
+        </div>
+        {/* End Modal */}
       </div>
     </div>
   );
