@@ -128,6 +128,7 @@ const InternManagement = () => {
 
         <input
           type="text"
+          id="Search-bar"
           className="form-control mb-3"
           placeholder="Search by Intern Name"
           value={searchQuery}

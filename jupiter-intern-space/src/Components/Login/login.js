@@ -175,14 +175,14 @@ const Login = () => {
   return (
     <div
       className="login-bg"
-      style={{ background: "url('/Background.png') no-repeat center center" }}
+      style={{ backgroundColor: "#DDDDDD", backgroundAttachment: "fixed" }}
     >
       <div
         className={`form-box ${activeTab === "signup" ? "signup-mode" : ""}`}
       >
         <div className="d-flex align-items-center justify-content-center gap-2 mb-4">
           <img src="/logo.png" alt="Logo" style={{ height: "50px" }} />
-          <h4 className="mb-0" style={{ color: "white" }}>
+          <h4 className="mb-0" style={{ color: "black" }}>
             Jupiter Intern Space
           </h4>
         </div>
@@ -200,10 +200,20 @@ const Login = () => {
           }}
           className="w-100 mb-3 tab-toggle"
         >
-          <ToggleButton id="t1" variant="outline-secondary" value="login">
+          <ToggleButton
+            id="t1"
+            variant="outline-secondary"
+            value="login"
+            style={{ color: "black" }}
+          >
             Login
           </ToggleButton>
-          <ToggleButton id="t2" variant="outline-secondary" value="signup">
+          <ToggleButton
+            id="t2"
+            variant="outline-secondary"
+            value="signup"
+            style={{ color: "black" }}
+          >
             Signup
           </ToggleButton>
         </ToggleButtonGroup>
@@ -410,8 +420,9 @@ const Login = () => {
 
           <Button
             type="submit"
-            className="gradient-btn w-100"
+            className="gradient-btn"
             disabled={loading}
+            id="login-btn"
           >
             {loading ? (
               <Spinner animation="border" size="sm" />

@@ -14,7 +14,11 @@ public class InternshipTechnology {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String Technologyname;
-    private String Description;
+
+    @Column(name = "Technologyname")
+    private String technologyname;
+
+    @Column(name = "Description")
+    private String description;
 }
 

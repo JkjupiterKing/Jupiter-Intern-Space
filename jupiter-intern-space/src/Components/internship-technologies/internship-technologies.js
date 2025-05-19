@@ -9,8 +9,8 @@ const InternshipTechnologies = () => {
   const [technologies, setTechnologies] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [formData, setFormData] = useState({
-    Technologyname: "",
-    Description: "",
+    technologyname: "",
+    description: "",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -67,8 +67,8 @@ const InternshipTechnologies = () => {
 
   const handleUpdateTechnology = (tech) => {
     setFormData({
-      Technologyname: tech.Technologyname,
-      Description: tech.Description,
+      technologyname: tech.technologyname,
+      description: tech.description,
     });
     setIsEditing(true);
     setEditingId(tech.id);
@@ -82,15 +82,15 @@ const InternshipTechnologies = () => {
 
   const resetForm = () => {
     setFormData({
-      Technologyname: "",
-      Description: "",
+      technologyname: "",
+      description: "",
     });
     setIsEditing(false);
     setEditingId(null);
   };
 
   const filteredTechnologies = technologies.filter((tech) =>
-    tech.Technologyname.toLowerCase().includes(searchQuery.toLowerCase())
+    tech.technologyname.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -112,6 +112,7 @@ const InternshipTechnologies = () => {
 
         <input
           type="text"
+          id="Search-bar"
           className="form-control mb-3"
           placeholder="Search by Technology Name"
           value={searchQuery}
@@ -129,21 +130,23 @@ const InternshipTechnologies = () => {
           <tbody>
             {filteredTechnologies.map((tech) => (
               <tr key={tech.id}>
-                <td>{tech.Technologyname}</td>
-                <td>{tech.Description}</td>
+                <td>{tech.technologyname}</td>
+                <td>{tech.description}</td>
                 <td>
-                  <button
-                    className="btn btn-sm btn-warning me-2"
-                    onClick={() => handleUpdateTechnology(tech)}
-                  >
-                    Update
-                  </button>
-                  <button
-                    className="btn btn-sm btn-danger"
-                    onClick={() => handleDeleteTechnology(tech.id)}
-                  >
-                    Delete
-                  </button>
+                  <div className="d-flex gap-2">
+                    <button
+                      className="btn btn-sm btn-warning"
+                      onClick={() => handleUpdateTechnology(tech)}
+                    >
+                      Update
+                    </button>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleDeleteTechnology(tech.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -173,26 +176,28 @@ const InternshipTechnologies = () => {
                 </div>
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label htmlFor="Technologyname" className="form-label">
+                    <label htmlFor="technologyname" className="form-label">
                       Technology Name
                     </label>
                     <input
                       type="text"
-                      id="Technologyname"
+                      id="technologyname"
+                      placeholder="Enter Technology name"
                       className="form-control"
-                      value={formData.Technologyname}
+                      value={formData.technologyname}
                       onChange={handleInputChange}
                       required
                     />
                   </div>
                   <div className="mb-3">
-                    <label htmlFor="Description" className="form-label">
-                      Description
+                    <label htmlFor="description" className="form-label">
+                      Technology Description
                     </label>
                     <textarea
-                      id="Description"
+                      id="description"
                       className="form-control"
-                      value={formData.Description}
+                      placeholder="Enter Technology Description"
+                      value={formData.description}
                       onChange={handleInputChange}
                       required
                     ></textarea>

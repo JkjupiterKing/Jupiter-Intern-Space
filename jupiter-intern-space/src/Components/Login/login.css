@@ -26,32 +26,22 @@
 .btn.btn-gradient,
 .btn.btn-outline-secondary {
   background: linear-gradient(to right, #d84ef7, #fa7fb4);
-  color: white;
+  color: black;
+  width: 3em;
   border: none;
 }
 
 .gradient-btn {
   background: linear-gradient(to right, #d84ef7, #fa7fb4);
   border: none;
+  width: 3em;
   font-weight: bold;
-  color: white;
+  color: black;
   transition: 0.3s ease;
 }
 
 .gradient-btn:hover {
   opacity: 0.9;
-}
-
-.forgot-link {
-  font-size: 0.9rem;
-  color: #d84ef7;
-  text-decoration: none;
-}
-
-.forgot-link:hover {
-  text-decoration: none;
-  color: black;
-  cursor: pointer;
 }
 
 .signup-link {
@@ -66,19 +56,22 @@
 
 .form-label {
   font-weight: 500;
-  color: white;
+  color: black;
 }
 
 .form-control {
   border-radius: 10px;
 }
+
 #forgot-link {
   text-decoration: none;
-  color: #fa7fb4;
-  margin-left: 7em;
+  color: black;
+  margin-left: 6em;
 }
+
 #forgot-link :hover {
   color: black;
+  cursor: pointer;
 }
 /* Add this class for wider form during signup */
 .form-box.signup-mode {
@@ -91,5 +84,7 @@
   border-radius: 16px;
   width: 100%;
   max-width: 400px; /* default for login */
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+#login-btn {
+  color: black;
 }
