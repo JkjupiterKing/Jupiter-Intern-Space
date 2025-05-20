@@ -164,6 +164,7 @@ const CollegeManagement = () => {
                 <td>
                   <button
                     className="btn btn-sm btn-primary me-2"
+                    id="update-btn"
                     onClick={() => handleUpdateCollege(college)}
                   >
                     Update

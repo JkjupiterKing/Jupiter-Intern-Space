@@ -5,6 +5,7 @@ import Navbar from "./Components/navbar/navbar";
 import CollegeManagement from "./Components/college-management/college-management";
 import InternManagement from "./Components/intern-management/intern-management";
 import InternshipTechnologies from "./Components/internship-technologies/internship-technologies";
+import Dashboard from "./Components/Dashboard/dashboard";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           path="/internship-technologies"
           element={<InternshipTechnologies />}
         />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );

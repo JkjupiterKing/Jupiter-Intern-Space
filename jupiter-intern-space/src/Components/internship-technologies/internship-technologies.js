@@ -135,7 +135,7 @@ const InternshipTechnologies = () => {
                 <td>
                   <div className="d-flex gap-2">
                     <button
-                      className="btn btn-sm btn-warning"
+                      className="btn btn-sm btn-primary"
                       onClick={() => handleUpdateTechnology(tech)}
                     >
                       Update

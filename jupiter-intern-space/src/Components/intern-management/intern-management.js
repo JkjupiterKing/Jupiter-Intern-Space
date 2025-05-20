@@ -160,7 +160,7 @@ const InternManagement = () => {
                 <td>{intern.yearOfStudy}</td>
                 <td>
                   <button
-                    className="btn btn-sm btn-warning me-2"
+                    className="btn btn-sm btn-primary me-2"
                     id="btn-update"
                     onClick={() => handleUpdateIntern(intern)}
                   >

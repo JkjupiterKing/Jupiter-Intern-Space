@@ -132,7 +132,9 @@ textarea {
   border-radius: 4px;
   cursor: pointer;
 }
-
+#update-btn {
+  margin-bottom: 5px;
+}
 /* Responsive improvements */
 @media (max-width: 768px) {
   .college-management-layout {
