@@ -6,6 +6,7 @@ import CollegeManagement from "./Components/college-management/college-managemen
 import InternManagement from "./Components/intern-management/intern-management";
 import InternshipTechnologies from "./Components/internship-technologies/internship-technologies";
 import Dashboard from "./Components/Dashboard/dashboard";
+import Certificatemanagement from "./Components/certificate-management/certificate-management";
 
 function App() {
   return (
@@ -21,6 +22,10 @@ function App() {
           element={<InternshipTechnologies />}
         />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/certificate-management"
+          element={<Certificatemanagement />}
+        />
       </Routes>
     </Router>
   );

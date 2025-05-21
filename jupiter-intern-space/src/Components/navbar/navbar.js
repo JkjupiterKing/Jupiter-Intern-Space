@@ -114,10 +114,10 @@ const Navbar = () => {
   );
 };
 
-const NavItem = ({ to, icon, label, isOpen, active }) => (
+const NavItem = ({ to, icon, label, isOpen }) => (
   <Link
     to={to}
-    className={`nav-item ${active ? "active" : ""}`}
+    className={`nav-item`}
     data-bs-toggle={!isOpen ? "tooltip" : ""}
     data-bs-placement="right"
     title={!isOpen ? label : ""}

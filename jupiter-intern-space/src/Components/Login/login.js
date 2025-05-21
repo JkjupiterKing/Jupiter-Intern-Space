@@ -152,7 +152,7 @@ const Login = () => {
             const { password, ...userWithoutPassword } = user;
             localStorage.setItem("user", JSON.stringify(userWithoutPassword));
 
-            navigate("/college-management");
+            navigate("/dashboard");
           } else {
             setMessage("Incorrect password.");
           }
